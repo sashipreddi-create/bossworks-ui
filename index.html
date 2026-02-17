@@ -10,6 +10,7 @@
   body { background: #e8e8ec; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; padding: 20px; }
   input::placeholder { color: #9CA3AF !important; }
   ::-webkit-scrollbar { display: none; }
+  @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 </style>
 </head>
 <body>
@@ -19,500 +20,470 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script type="text/babel">
 const { useState } = React;
-
-const SUB_TABS = {
-  plan: ["Business Plan", "Financial Plan"],
-  track: ["Tasks", "Projects"],
-  budget: ["Expenses", "Revenue", "Dashboard"],
-  funding: ["Grants", "Loans", "Investment"],
-};
-
-const PlanIcon = ({ active }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-    <rect x="9" y="3" width="6" height="4" rx="1" />
-    <path d="M9 12h6M9 16h6" />
-  </svg>
-);
-const TrackIcon = ({ active }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-    <path d="M9 12l2 2 4-4" />
-  </svg>
-);
-const BudgetIcon = ({ active }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-);
-const FundingIcon = ({ active }) => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#fff" : "#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-  </svg>
-);
-const SparkleIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
-  </svg>
-);
-const ChevronIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 18l6-6-6-6" />
-  </svg>
-);
-const PlusIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-    <path d="M12 5v14M5 12h14" />
-  </svg>
-);
-
+const SUB_TABS = { plan: ["Business Plan", "Financial Plan"], track: ["Tasks", "Projects"], budget: ["Expenses", "Revenue", "Dashboard"], funding: ["Grants", "Loans", "Investment"] };
+const PlanIcon = ({ active }) => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active?"#fff":"#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>);
+const TrackIcon = ({ active }) => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active?"#fff":"#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>);
+const BudgetIcon = ({ active }) => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active?"#fff":"#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>);
+const FundingIcon = ({ active }) => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active?"#fff":"#8B8FA3"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>);
+const SparkleIcon = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>);
+const ChevronIcon = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>);
+const PlusIcon = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>);
+const BackIcon = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>);
+const BellIcon = ({ count }) => (<div style={{position:"relative",cursor:"pointer"}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>{count>0&&<div style={{position:"absolute",top:-4,right:-4,width:16,height:16,borderRadius:"50%",background:"#EF4444",color:"#fff",fontSize:9,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",border:"2px solid #FAFAFA"}}>{count}</div>}</div>);
 const iconMap = { plan: PlanIcon, track: TrackIcon, budget: BudgetIcon, funding: FundingIcon };
 
 const AIPromptBar = ({ context }) => {
   const [focused, setFocused] = useState(false);
-  const hints = {
-    plan: "Ask AI to help write your next section...",
-    track: "Ask AI to suggest tasks or set priorities...",
-    budget: "Ask AI to categorize expenses or forecast...",
-    funding: "Ask AI to find more opportunities...",
-  };
+  const hints = { plan:"Ask AI to help write your next section...", track:"Ask AI to suggest tasks or set priorities...", budget:"Ask AI to categorize expenses or forecast...", funding:"Ask AI to find more opportunities..." };
+  return (<div style={{position:"fixed",bottom:72,left:"50%",transform:"translateX(-50%)",width:"min(calc(100% - 40px), 355px)",background:focused?"#fff":"rgba(255,255,255,0.95)",backdropFilter:"blur(20px)",borderRadius:16,padding:"10px 14px",display:"flex",alignItems:"center",gap:10,boxShadow:focused?"0 4px 24px rgba(0,0,0,0.15), 0 0 0 2px #1a1a2e":"0 2px 16px rgba(0,0,0,0.1)",transition:"all 0.2s ease",zIndex:10}}>
+    <div style={{color:focused?"#1a1a2e":"#9CA3AF",transition:"color 0.2s"}}><SparkleIcon/></div>
+    <input placeholder={hints[context]} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} style={{flex:1,border:"none",outline:"none",fontSize:13,color:"#1a1a2e",background:"transparent",fontFamily:"'DM Sans', sans-serif"}}/>
+    <div style={{width:30,height:30,borderRadius:10,background:"#1a1a2e",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+  </div>);
+};
+
+/* ===== TOGGLE SWITCH ===== */
+const ToggleSwitch = ({ isOn, onToggle, labelLeft, labelRight }) => (
+  <div style={{display:"flex",alignItems:"center",gap:10,background:"#F3F4F6",borderRadius:10,padding:3}}>
+    <button onClick={()=>onToggle(false)} style={{flex:1,padding:"7px 12px",borderRadius:8,border:"none",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans', sans-serif",background:!isOn?"#fff":"transparent",color:!isOn?"#1a1a2e":"#9CA3AF",boxShadow:!isOn?"0 1px 3px rgba(0,0,0,0.1)":"none",transition:"all 0.2s ease"}}>{labelLeft}</button>
+    <button onClick={()=>onToggle(true)} style={{flex:1,padding:"7px 12px",borderRadius:8,border:"none",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans', sans-serif",background:isOn?"#fff":"transparent",color:isOn?"#1a1a2e":"#9CA3AF",boxShadow:isOn?"0 1px 3px rgba(0,0,0,0.1)":"none",transition:"all 0.2s ease"}}>{labelRight}</button>
+  </div>
+);
+
+/* ===== NOTIFICATION PANEL ===== */
+const NotificationPanel = ({ onClose }) => {
+  const notifications = [
+    { project:"Legal Setup", items:[
+      { text:"Task assigned: Open business bank account", time:"2h ago", unread:true, type:"assign" },
+      { text:"EIN application task marked complete", time:"5h ago", unread:true, type:"status" },
+    ]},
+    { project:"Location", items:[
+      { text:"Due tomorrow: Finalize lease negotiation", time:"1d", unread:true, type:"due" },
+    ]},
+    { project:"Marketing", items:[
+      { text:"@you mentioned in logo design task", time:"3h ago", unread:false, type:"mention" },
+      { text:"New task created: Set up Instagram", time:"1d", unread:false, type:"new" },
+    ]},
+  ];
+  const typeIcons = { assign:{bg:"#EEF2FF",color:"#6366F1",icon:"\u2192"}, status:{bg:"#E8F5E9",color:"#2E7D32",icon:"\u2713"}, due:{bg:"#FFF3E0",color:"#E65100",icon:"\u23F0"}, mention:{bg:"#F3E8FF",color:"#7C3AED",icon:"@"}, new:{bg:"#E0F2FE",color:"#0284C7",icon:"+"} };
   return (
-    <div style={{
-      position: "fixed", bottom: 72, left: "50%", transform: "translateX(-50%)", width: "min(calc(100% - 40px), 355px)",
-      background: focused ? "#fff" : "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)",
-      borderRadius: 16, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10,
-      boxShadow: focused ? "0 4px 24px rgba(0,0,0,0.15), 0 0 0 2px #1a1a2e" : "0 2px 16px rgba(0,0,0,0.1)",
-      transition: "all 0.2s ease", zIndex: 10,
-    }}>
-      <div style={{ color: focused ? "#1a1a2e" : "#9CA3AF", transition: "color 0.2s" }}><SparkleIcon /></div>
-      <input
-        placeholder={hints[context]}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        style={{
-          flex: 1, border: "none", outline: "none", fontSize: 13, color: "#1a1a2e", background: "transparent",
-          fontFamily: "'DM Sans', sans-serif",
-        }}
-      />
-      <div style={{
-        width: 30, height: 30, borderRadius: 10, background: "#1a1a2e", display: "flex",
-        alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0,
-      }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+    <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:100,background:"#FAFAFA",animation:"slideDown 0.2s ease"}}>
+      <div style={{padding:"14px 20px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #ECECEF"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={onClose}><BackIcon/><span style={{fontSize:17,fontWeight:700,color:"#1a1a2e"}}>Notifications</span></div>
+        <button style={{border:"none",background:"none",fontSize:12,color:"#6366F1",fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans', sans-serif"}}>Mark all read</button>
+      </div>
+      <div style={{overflowY:"auto",height:"calc(100% - 50px)",padding:"8px 0"}}>
+        {notifications.map((group,gi)=>(
+          <div key={gi} style={{marginBottom:4}}>
+            <div style={{padding:"10px 20px 6px",fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:0.8,display:"flex",alignItems:"center",gap:6}}>
+              {group.project}
+              {group.items.some(i=>i.unread)&&<div style={{width:6,height:6,borderRadius:"50%",background:"#EF4444"}}/>}
+            </div>
+            {group.items.map((item,ii)=>{
+              const t=typeIcons[item.type];
+              return (
+                <div key={ii} style={{padding:"10px 20px",display:"flex",gap:10,alignItems:"flex-start",background:item.unread?"#F8F9FF":"transparent",cursor:"pointer"}}>
+                  <div style={{width:30,height:30,borderRadius:8,background:t.bg,color:t.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,flexShrink:0,marginTop:1}}>{t.icon}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,color:"#1a1a2e",fontWeight:item.unread?600:400,lineHeight:1.4}}>{item.text}</div>
+                    <div style={{fontSize:11,color:"#9CA3AF",marginTop:2}}>{item.time}</div>
+                  </div>
+                  {item.unread&&<div style={{width:7,height:7,borderRadius:"50%",background:"#6366F1",flexShrink:0,marginTop:6}}/>}
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-const BusinessPlanContent = () => (
-  <div style={{ padding: "0 20px 100px" }}>
-    {[
-      { num: "01", title: "Executive Summary", meta: "Last edited 2 days ago", status: "Complete", statusBg: "#E8F5E9", statusColor: "#2E7D32", preview: "A neighborhood bakery specializing in artisan sourdough and seasonal pastries, serving the growing Fishtown community..." },
-      { num: "02", title: "Market Analysis", meta: "Last edited 5 days ago", status: "In Progress", statusBg: "#FFF3E0", statusColor: "#E65100", preview: "Target demographic analysis and competitive landscape for the Philadelphia artisan bakery market..." },
-      { num: "03", title: "Products & Services", meta: "Not started", status: "To Do", statusBg: "#F3F4F6", statusColor: "#6B7280" },
-      { num: "04", title: "Marketing Strategy", meta: "Not started", status: "To Do", statusBg: "#F3F4F6", statusColor: "#6B7280" },
-      { num: "05", title: "Operations Plan", meta: "Not started", status: "To Do", statusBg: "#F3F4F6", statusColor: "#6B7280" },
-    ].map((s, i) => (
-      <div key={i} style={styles.sectionCard}>
-        <div style={styles.sectionHeader}>
-          <span style={styles.sectionNumber}>{s.num}</span>
-          <div style={{ flex: 1 }}>
-            <div style={styles.sectionTitle}>{s.title}</div>
-            <div style={styles.sectionMeta}>{s.meta}</div>
-          </div>
-          <div style={{ ...styles.statusBadge, background: s.statusBg, color: s.statusColor }}>{s.status}</div>
-        </div>
-        {s.preview && <div style={styles.sectionPreview}>{s.preview}</div>}
-      </div>
-    ))}
-    <AIPromptBar context="plan" />
-  </div>
-);
+/* ===== PROFILE PANEL WITH TOGGLE ===== */
+const ProfilePanel = ({ onClose, onAdminNavigate, isAdmin, onToggleRole }) => (
+  <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:100,background:"#FAFAFA",animation:"slideDown 0.2s ease"}}>
+    <div style={{padding:"14px 20px 12px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #ECECEF",cursor:"pointer"}} onClick={onClose}><BackIcon/><span style={{fontSize:17,fontWeight:700,color:"#1a1a2e"}}>Profile</span></div>
+    <div style={{padding:20,overflowY:"auto",height:"calc(100% - 50px)"}}>
 
-const FinancialPlanContent = () => (
-  <div style={{ padding: "0 20px 100px" }}>
-    {[
-      { num: "01", title: "Startup Cost Estimate", meta: "AI-generated from your plan", status: "Ready", statusBg: "#E8F5E9", statusColor: "#2E7D32", preview: "Estimated total startup costs: $45,200 including equipment, lease, inventory, and working capital..." },
-      { num: "02", title: "Revenue Projections", meta: "12-month forecast", status: "Draft", statusBg: "#FFF3E0", statusColor: "#E65100" },
-      { num: "03", title: "Cash Flow Forecast", meta: "Not started", status: "To Do", statusBg: "#F3F4F6", statusColor: "#6B7280" },
-      { num: "04", title: "Break-Even Analysis", meta: "Not started", status: "To Do", statusBg: "#F3F4F6", statusColor: "#6B7280" },
-    ].map((s, i) => (
-      <div key={i} style={styles.sectionCard}>
-        <div style={styles.sectionHeader}>
-          <span style={styles.sectionNumber}>{s.num}</span>
-          <div style={{ flex: 1 }}>
-            <div style={styles.sectionTitle}>{s.title}</div>
-            <div style={styles.sectionMeta}>{s.meta}</div>
-          </div>
-          <div style={{ ...styles.statusBadge, background: s.statusBg, color: s.statusColor }}>{s.status}</div>
-        </div>
-        {s.preview && <div style={styles.sectionPreview}>{s.preview}</div>}
+      {/* Demo toggle */}
+      <div style={{marginBottom:16,padding:"10px 12px",background:"#FFFBEB",border:"1px solid #FDE68A",borderRadius:10}}>
+        <div style={{fontSize:11,fontWeight:600,color:"#92400E",marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Demo: Switch User View</div>
+        <ToggleSwitch isOn={!isAdmin} onToggle={(val)=>onToggleRole(!val)} labelLeft="Admin" labelRight="Standard User" />
       </div>
-    ))}
-    <AIPromptBar context="plan" />
-  </div>
-);
 
-const TasksContent = () => {
-  const [filter, setFilter] = useState("all");
-  const tasks = [
-    { title: "Register business with PA Secretary of State", project: "Legal Setup", due: "Feb 20", done: true },
-    { title: "Apply for EIN from IRS", project: "Legal Setup", due: "Feb 22", done: true },
-    { title: "Open business bank account", project: "Legal Setup", due: "Feb 25", done: false },
-    { title: "Finalize lease negotiation for storefront", project: "Location", due: "Mar 1", done: false },
-    { title: "Get commercial kitchen inspection scheduled", project: "Location", due: "Mar 5", done: false },
-    { title: "Order initial equipment (ovens, mixers)", project: "Equipment", due: "Mar 10", done: false },
-    { title: "Design brand logo and signage", project: "Marketing", due: "Mar 3", done: false },
-    { title: "Set up Instagram and Google Business", project: "Marketing", due: "Mar 7", done: false },
-  ];
-  const filtered = filter === "all" ? tasks : filter === "done" ? tasks.filter(t => t.done) : tasks.filter(t => !t.done);
-  return (
-    <div style={{ padding: "0 20px 100px" }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {["all", "active", "done"].map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={{
-            padding: "6px 14px", borderRadius: 20, border: "none", fontSize: 13, fontWeight: 500,
-            background: filter === f ? "#1a1a2e" : "#F3F4F6", color: filter === f ? "#fff" : "#6B7280",
-            cursor: "pointer", textTransform: "capitalize", fontFamily: "'DM Sans', sans-serif",
-          }}>{f}</button>
+      {/* User card */}
+      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:24}}>
+        <div style={{width:52,height:52,borderRadius:16,background:isAdmin?"linear-gradient(135deg, #6366F1, #8B5CF6)":"linear-gradient(135deg, #EC4899, #F472B6)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:20,fontWeight:700}}>{isAdmin?"S":"P"}</div>
+        <div>
+          <div style={{fontSize:16,fontWeight:700,color:"#1a1a2e"}}>{isAdmin?"Sashi Reddi":"Priya Sharma"}</div>
+          <div style={{fontSize:13,color:"#9CA3AF"}}>{isAdmin?"sashi@bossworks.ai":"priya@email.com"}</div>
+          <div style={{display:"flex",gap:6,marginTop:4}}>
+            <div style={{display:"inline-block",fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:4,background:isAdmin?"#EEF2FF":"#F3F4F6",color:isAdmin?"#6366F1":"#6B7280"}}>{isAdmin?"Admin":"Standard User"}</div>
+            {!isAdmin&&<div style={{display:"inline-block",fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:4,background:"#F3F4F6",color:"#6B7280"}}>Employee</div>}
+          </div>
+        </div>
+      </div>
+
+      {/* Admin Console — only for Admin */}
+      {isAdmin && (
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Admin Console</div>
+          {[
+            {label:"User Management",desc:"Invite, manage roles & access",icon:"\uD83D\uDC65",key:"users"},
+            {label:"Business Overview",desc:"Health metrics across businesses",icon:"\uD83D\uDCCA",key:"business"},
+            {label:"Billing & Subscription",desc:"Plan, seats, AI credits",icon:"\uD83D\uDCB3",key:"billing"},
+            {label:"Account Settings",desc:"Security, transfer, integrations",icon:"\u2699\uFE0F",key:"settings"},
+          ].map((item,i)=>(
+            <div key={i} onClick={()=>onAdminNavigate(item.key)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#fff",borderRadius:12,marginBottom:6,border:"1px solid #ECECEF",cursor:"pointer"}}>
+              <div style={{fontSize:20,width:36,height:36,borderRadius:10,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.icon}</div>
+              <div style={{flex:1}}><div style={{fontSize:14,fontWeight:600,color:"#1a1a2e"}}>{item.label}</div><div style={{fontSize:12,color:"#9CA3AF"}}>{item.desc}</div></div>
+              <ChevronIcon/>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* My Access — only for Standard User */}
+      {!isAdmin && (
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>My Access</div>
+          <div style={{background:"#fff",borderRadius:12,border:"1px solid #ECECEF",overflow:"hidden"}}>
+            {[
+              {label:"Fishtown Bakery",value:"3 projects",icon:"\uD83C\uDFEA"},
+              {label:"Business Plan",value:"View Only",icon:"\uD83D\uDCCB"},
+              {label:"Finance Dashboard",value:"No Access",icon:"\uD83D\uDCB0",locked:true},
+              {label:"Financial Plan",value:"No Access",icon:"\uD83D\uDCC8",locked:true},
+              {label:"Funding",value:"View Only",icon:"\uD83D\uDE80"},
+            ].map((item,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderBottom:i<4?"1px solid #F3F4F6":"none",opacity:item.locked?0.5:1}}>
+                <div style={{fontSize:16,width:30,height:30,borderRadius:8,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.icon}</div>
+                <div style={{flex:1,fontSize:13,fontWeight:500,color:"#1a1a2e"}}>{item.label}</div>
+                <div style={{fontSize:12,color:item.locked?"#EF4444":"#6B7280",fontWeight:500}}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{fontSize:11,color:"#9CA3AF",marginTop:8,padding:"0 4px",lineHeight:1.5}}>Access is managed by your account admin. Contact them to request changes.</div>
+        </div>
+      )}
+
+      {/* Account section — shared by both */}
+      <div>
+        <div style={{fontSize:11,fontWeight:700,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Account</div>
+        {[
+          {label:"Edit Profile",icon:"\u270F\uFE0F"},
+          {label:"Notification Preferences",icon:"\uD83D\uDD14"},
+          {label:"Help & Support",icon:"\u2753"},
+          {label:"Sign Out",icon:"\uD83D\uDEAA",danger:true},
+        ].map((item,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#fff",borderRadius:12,marginBottom:6,border:"1px solid #ECECEF",cursor:"pointer"}}>
+            <div style={{fontSize:18,width:36,height:36,borderRadius:10,background:item.danger?"#FEF2F2":"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.icon}</div>
+            <div style={{fontSize:14,fontWeight:500,color:item.danger?"#EF4444":"#1a1a2e",flex:1}}>{item.label}</div>
+            <ChevronIcon/>
+          </div>
         ))}
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 12, color: "#9CA3AF", alignSelf: "center" }}>{filtered.length} tasks</span>
       </div>
-      {filtered.map((task, i) => (
-        <div key={i} style={{ ...styles.taskRow, opacity: task.done ? 0.55 : 1 }}>
-          <div style={{
-            width: 22, height: 22, borderRadius: 6, border: task.done ? "none" : "2px solid #D1D5DB",
-            background: task.done ? "#1a1a2e" : "transparent", display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, marginTop: 1,
-          }}>
-            {task.done && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>}
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: "#1a1a2e", textDecoration: task.done ? "line-through" : "none", fontFamily: "'DM Sans', sans-serif" }}>{task.title}</div>
-            <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2, fontFamily: "'DM Sans', sans-serif" }}>{task.project} · Due {task.due}</div>
-          </div>
+    </div>
+  </div>
+);
+
+/* ===== ADMIN SCREENS ===== */
+const AdminUserManagement = ({ onBack }) => {
+  const users = [
+    {name:"Sashi Reddi",email:"sashi@bossworks.ai",role:"Admin",label:null,status:"Active",initial:"S",color:"#6366F1"},
+    {name:"Priya Sharma",email:"priya@email.com",role:"Standard",label:"Employee",status:"Active",initial:"P",color:"#EC4899"},
+    {name:"James Wilson",email:"james@email.com",role:"PO",label:"Contractor",status:"Active",initial:"J",color:"#10B981"},
+    {name:"Maria Garcia",email:"maria@email.com",role:"Standard",label:"Accountant",status:"Pending",initial:"M",color:"#F59E0B"},
+    {name:"Alex Chen",email:"alex@email.com",role:"Standard",label:"Advisor",status:"Expired",initial:"A",color:"#8B5CF6"},
+  ];
+  const sc={Active:{bg:"#E8F5E9",color:"#2E7D32"},Pending:{bg:"#FFF3E0",color:"#E65100"},Expired:{bg:"#FEF2F2",color:"#EF4444"}};
+  return (
+    <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:110,background:"#FAFAFA",animation:"slideDown 0.2s ease"}}>
+      <div style={{padding:"14px 20px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #ECECEF"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={onBack}><BackIcon/><span style={{fontSize:17,fontWeight:700,color:"#1a1a2e"}}>User Management</span></div>
+        <button style={{border:"none",background:"#1a1a2e",color:"#fff",fontSize:12,fontWeight:600,padding:"6px 12px",borderRadius:8,cursor:"pointer",fontFamily:"'DM Sans', sans-serif"}}>+ Invite</button>
+      </div>
+      <div style={{padding:"12px 20px",overflowY:"auto",height:"calc(100% - 50px)"}}>
+        <div style={{display:"flex",gap:6,marginBottom:14,overflowX:"auto"}}>
+          {["All","Active","Pending","Expired"].map((f,i)=>(<button key={i} style={{padding:"5px 12px",borderRadius:20,border:"none",fontSize:12,fontWeight:500,background:i===0?"#1a1a2e":"#F3F4F6",color:i===0?"#fff":"#6B7280",cursor:"pointer",fontFamily:"'DM Sans', sans-serif",whiteSpace:"nowrap"}}>{f}</button>))}
         </div>
-      ))}
-      <AIPromptBar context="track" />
+        <div style={{fontSize:12,color:"#9CA3AF",marginBottom:10}}>{users.length} users \u00B7 3 of 10 seats used</div>
+        {users.map((u,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid #F3F4F6"}}>
+            <div style={{width:38,height:38,borderRadius:12,background:u.color,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:14,fontWeight:700,flexShrink:0}}>{u.initial}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14,fontWeight:600,color:"#1a1a2e"}}>{u.name}</span>{u.label&&<span style={{fontSize:10,padding:"1px 6px",borderRadius:4,background:"#F3F4F6",color:"#6B7280"}}>{u.label}</span>}</div>
+              <div style={{fontSize:12,color:"#9CA3AF",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{u.email}</div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3}}>
+              <span style={{fontSize:10,fontWeight:600,padding:"2px 6px",borderRadius:4,background:sc[u.status].bg,color:sc[u.status].color}}>{u.status}</span>
+              <span style={{fontSize:10,color:"#9CA3AF"}}>{u.role}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
+};
+
+const AdminBusinessOverview = ({ onBack }) => {
+  const businesses=[{name:"Fishtown Bakery",users:3,projects:4,tasks:18,completion:28,status:"on-track"},{name:"Center City Cafe",users:2,projects:2,tasks:8,completion:12,status:"at-risk"}];
+  const sConfig={"on-track":{label:"On Track",bg:"#E8F5E9",color:"#2E7D32"},"at-risk":{label:"At Risk",bg:"#FFF3E0",color:"#E65100"}};
+  return (
+    <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:110,background:"#FAFAFA",animation:"slideDown 0.2s ease"}}>
+      <div style={{padding:"14px 20px 12px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #ECECEF",cursor:"pointer"}} onClick={onBack}><BackIcon/><span style={{fontSize:17,fontWeight:700,color:"#1a1a2e"}}>Business Overview</span></div>
+      <div style={{padding:"16px 20px",overflowY:"auto",height:"calc(100% - 50px)"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+          {[{label:"Total Users",value:"5"},{label:"Active Projects",value:"6"},{label:"Open Tasks",value:"26"},{label:"Overdue",value:"3",color:"#EF4444"}].map((m,i)=>(
+            <div key={i} style={{background:"#fff",borderRadius:12,padding:14,border:"1px solid #ECECEF"}}><div style={{fontSize:11,color:"#9CA3AF",textTransform:"uppercase",letterSpacing:0.5}}>{m.label}</div><div style={{fontSize:22,fontWeight:700,color:m.color||"#1a1a2e",marginTop:2}}>{m.value}</div></div>
+          ))}
+        </div>
+        {businesses.map((b,i)=>{const s=sConfig[b.status];return(
+          <div key={i} style={{background:"#fff",borderRadius:14,padding:16,marginBottom:10,border:"1px solid #ECECEF"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:15,fontWeight:600,color:"#1a1a2e"}}>{b.name}</div><div style={{fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:4,background:s.bg,color:s.color}}>{s.label}</div></div>
+            <div style={{display:"flex",gap:16,fontSize:12,color:"#6B7280",marginBottom:10}}><span>{b.users} users</span><span>{b.projects} projects</span><span>{b.tasks} tasks</span></div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{flex:1,height:6,background:"#F3F4F6",borderRadius:3,overflow:"hidden"}}><div style={{width:b.completion+"%",height:"100%",background:"#6366F1",borderRadius:3}}/></div><span style={{fontSize:11,color:"#9CA3AF"}}>{b.completion}%</span></div>
+          </div>
+        );})}
+      </div>
+    </div>
+  );
+};
+
+const AdminBilling = ({ onBack }) => (
+  <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:110,background:"#FAFAFA",animation:"slideDown 0.2s ease"}}>
+    <div style={{padding:"14px 20px 12px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #ECECEF",cursor:"pointer"}} onClick={onBack}><BackIcon/><span style={{fontSize:17,fontWeight:700,color:"#1a1a2e"}}>Billing & Subscription</span></div>
+    <div style={{padding:"16px 20px",overflowY:"auto",height:"calc(100% - 50px)"}}>
+      <div style={{background:"linear-gradient(135deg, #1a1a2e 0%, #2d2b55 100%)",borderRadius:16,padding:20,marginBottom:16,color:"#fff"}}>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.6)",textTransform:"uppercase",letterSpacing:1}}>Current Plan</div>
+        <div style={{fontSize:24,fontWeight:700,marginTop:4}}>Team</div>
+        <div style={{fontSize:13,color:"rgba(255,255,255,0.7)",marginTop:4}}>Renews Mar 17, 2026</div>
+        <div style={{display:"flex",gap:16,marginTop:14,fontSize:12,color:"rgba(255,255,255,0.8)"}}><span>3/10 seats</span><span>$49/mo</span></div>
+      </div>
+      <div style={{background:"#fff",borderRadius:14,padding:16,marginBottom:10,border:"1px solid #ECECEF"}}>
+        <div style={{fontSize:13,fontWeight:600,color:"#1a1a2e",marginBottom:10}}>AI Credits</div>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span style={{fontSize:12,color:"#6B7280"}}>3,240 / 5,000 used</span><span style={{fontSize:12,fontWeight:600,color:"#E65100"}}>1,760 remaining</span></div>
+        <div style={{height:8,background:"#F3F4F6",borderRadius:4,overflow:"hidden"}}><div style={{width:"64.8%",height:"100%",background:"linear-gradient(90deg, #6366F1, #8B5CF6)",borderRadius:4}}/></div>
+        <button style={{marginTop:12,width:"100%",padding:10,borderRadius:10,border:"1px solid #6366F1",background:"transparent",color:"#6366F1",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans', sans-serif"}}>Buy More Credits</button>
+      </div>
+      <div style={{background:"#fff",borderRadius:14,padding:16,border:"1px solid #ECECEF"}}>
+        <div style={{fontSize:13,fontWeight:600,color:"#1a1a2e",marginBottom:10}}>Credit Usage by User</div>
+        {[{name:"Sashi Reddi",credits:1800,pct:55.6},{name:"Priya Sharma",credits:890,pct:27.5},{name:"James Wilson",credits:550,pct:17.0}].map((u,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+            <span style={{fontSize:12,color:"#4B5563",width:90,flexShrink:0}}>{u.name}</span>
+            <div style={{flex:1,height:5,background:"#F3F4F6",borderRadius:3,overflow:"hidden"}}><div style={{width:u.pct+"%",height:"100%",background:"#6366F1",borderRadius:3}}/></div>
+            <span style={{fontSize:11,color:"#9CA3AF",width:40,textAlign:"right"}}>{u.credits}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const AdminSettings = ({ onBack }) => (
+  <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:110,background:"#FAFAFA",animation:"slideDown 0.2s ease"}}>
+    <div style={{padding:"14px 20px 12px",display:"flex",alignItems:"center",gap:10,borderBottom:"1px solid #ECECEF",cursor:"pointer"}} onClick={onBack}><BackIcon/><span style={{fontSize:17,fontWeight:700,color:"#1a1a2e"}}>Account Settings</span></div>
+    <div style={{padding:"16px 20px",overflowY:"auto",height:"calc(100% - 50px)"}}>
+      {[
+        {label:"Transfer Account Ownership",desc:"Transfer admin rights to another user",icon:"\uD83D\uDD04"},
+        {label:"Security Settings",desc:"Password, 2FA, session management",icon:"\uD83D\uDD12"},
+        {label:"Connected Services",desc:"API integrations, Google Drive sync",icon:"\uD83D\uDD17"},
+        {label:"Audit Trail",desc:"View platform activity logs",icon:"\uD83D\uDCCB"},
+        {label:"Data Export",desc:"Export account data",icon:"\uD83D\uDCE6"},
+      ].map((item,i)=>(
+        <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px",background:"#fff",borderRadius:12,marginBottom:8,border:"1px solid #ECECEF",cursor:"pointer"}}>
+          <div style={{fontSize:18,width:36,height:36,borderRadius:10,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center"}}>{item.icon}</div>
+          <div style={{flex:1}}><div style={{fontSize:14,fontWeight:600,color:"#1a1a2e"}}>{item.label}</div><div style={{fontSize:12,color:"#9CA3AF"}}>{item.desc}</div></div>
+          <ChevronIcon/>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+/* ===== CONTENT SCREENS ===== */
+const BusinessPlanContent = () => (<div style={{padding:"0 20px 100px"}}>{[
+  {num:"01",title:"Executive Summary",meta:"Last edited 2 days ago",status:"Complete",statusBg:"#E8F5E9",statusColor:"#2E7D32",preview:"A neighborhood bakery specializing in artisan sourdough and seasonal pastries, serving the growing Fishtown community..."},
+  {num:"02",title:"Market Analysis",meta:"Last edited 5 days ago",status:"In Progress",statusBg:"#FFF3E0",statusColor:"#E65100",preview:"Target demographic analysis and competitive landscape for the Philadelphia artisan bakery market..."},
+  {num:"03",title:"Products & Services",meta:"Not started",status:"To Do",statusBg:"#F3F4F6",statusColor:"#6B7280"},
+  {num:"04",title:"Marketing Strategy",meta:"Not started",status:"To Do",statusBg:"#F3F4F6",statusColor:"#6B7280"},
+  {num:"05",title:"Operations Plan",meta:"Not started",status:"To Do",statusBg:"#F3F4F6",statusColor:"#6B7280"},
+].map((s,i)=>(<div key={i} style={styles.sectionCard}><div style={styles.sectionHeader}><span style={styles.sectionNumber}>{s.num}</span><div style={{flex:1}}><div style={styles.sectionTitle}>{s.title}</div><div style={styles.sectionMeta}>{s.meta}</div></div><div style={{...styles.statusBadge,background:s.statusBg,color:s.statusColor}}>{s.status}</div></div>{s.preview&&<div style={styles.sectionPreview}>{s.preview}</div>}</div>))}<AIPromptBar context="plan"/></div>);
+
+const FinancialPlanContent = () => (<div style={{padding:"0 20px 100px"}}>{[
+  {num:"01",title:"Startup Cost Estimate",meta:"AI-generated from your plan",status:"Ready",statusBg:"#E8F5E9",statusColor:"#2E7D32",preview:"Estimated total startup costs: $45,200 including equipment, lease, inventory, and working capital..."},
+  {num:"02",title:"Revenue Projections",meta:"12-month forecast",status:"Draft",statusBg:"#FFF3E0",statusColor:"#E65100"},
+  {num:"03",title:"Cash Flow Forecast",meta:"Not started",status:"To Do",statusBg:"#F3F4F6",statusColor:"#6B7280"},
+  {num:"04",title:"Break-Even Analysis",meta:"Not started",status:"To Do",statusBg:"#F3F4F6",statusColor:"#6B7280"},
+].map((s,i)=>(<div key={i} style={styles.sectionCard}><div style={styles.sectionHeader}><span style={styles.sectionNumber}>{s.num}</span><div style={{flex:1}}><div style={styles.sectionTitle}>{s.title}</div><div style={styles.sectionMeta}>{s.meta}</div></div><div style={{...styles.statusBadge,background:s.statusBg,color:s.statusColor}}>{s.status}</div></div>{s.preview&&<div style={styles.sectionPreview}>{s.preview}</div>}</div>))}<AIPromptBar context="plan"/></div>);
+
+const TasksContent = () => {
+  const [filter,setFilter]=useState("all");
+  const tasks=[
+    {title:"Register business with PA Secretary of State",project:"Legal Setup",due:"Feb 20",done:true,notif:0},
+    {title:"Apply for EIN from IRS",project:"Legal Setup",due:"Feb 22",done:true,notif:1},
+    {title:"Open business bank account",project:"Legal Setup",due:"Feb 25",done:false,notif:1},
+    {title:"Finalize lease negotiation for storefront",project:"Location",due:"Mar 1",done:false,notif:1},
+    {title:"Get commercial kitchen inspection scheduled",project:"Location",due:"Mar 5",done:false,notif:0},
+    {title:"Order initial equipment (ovens, mixers)",project:"Equipment",due:"Mar 10",done:false,notif:0},
+    {title:"Design brand logo and signage",project:"Marketing",due:"Mar 3",done:false,notif:1},
+    {title:"Set up Instagram and Google Business",project:"Marketing",due:"Mar 7",done:false,notif:0},
+  ];
+  const filtered=filter==="all"?tasks:filter==="done"?tasks.filter(t=>t.done):tasks.filter(t=>!t.done);
+  return (<div style={{padding:"0 20px 100px"}}>
+    <div style={{display:"flex",gap:8,marginBottom:16}}>
+      {["all","active","done"].map(f=>(<button key={f} onClick={()=>setFilter(f)} style={{padding:"6px 14px",borderRadius:20,border:"none",fontSize:13,fontWeight:500,background:filter===f?"#1a1a2e":"#F3F4F6",color:filter===f?"#fff":"#6B7280",cursor:"pointer",textTransform:"capitalize",fontFamily:"'DM Sans', sans-serif"}}>{f}</button>))}
+      <div style={{flex:1}}/><span style={{fontSize:12,color:"#9CA3AF",alignSelf:"center"}}>{filtered.length} tasks</span>
+    </div>
+    {filtered.map((task,i)=>(<div key={i} style={{...styles.taskRow,opacity:task.done?0.55:1}}>
+      <div style={{width:22,height:22,borderRadius:6,border:task.done?"none":"2px solid #D1D5DB",background:task.done?"#1a1a2e":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>{task.done&&<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}</div>
+      <div style={{flex:1}}><div style={{fontSize:14,fontWeight:500,color:"#1a1a2e",textDecoration:task.done?"line-through":"none"}}>{task.title}</div><div style={{fontSize:12,color:"#9CA3AF",marginTop:2}}>{task.project} \u00B7 Due {task.due}</div></div>
+      {task.notif>0&&<div style={{width:7,height:7,borderRadius:"50%",background:"#6366F1",flexShrink:0}}/>}
+    </div>))}
+    <AIPromptBar context="track"/>
+  </div>);
 };
 
 const ProjectsContent = () => {
-  const projects = [
-    { name: "Legal Setup", tasks: 3, completed: 2, color: "#6366F1" },
-    { name: "Location", tasks: 4, completed: 0, color: "#EC4899" },
-    { name: "Equipment", tasks: 3, completed: 0, color: "#F59E0B" },
-    { name: "Marketing", tasks: 5, completed: 0, color: "#10B981" },
-  ];
-  return (
-    <div style={{ padding: "0 20px 100px" }}>
-      {projects.map((p, i) => (
-        <div key={i} style={styles.projectCard}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <div style={{ width: 10, height: 10, borderRadius: 3, background: p.color }} />
-            <div style={{ fontSize: 15, fontWeight: 600, color: "#1a1a2e", flex: 1, fontFamily: "'DM Sans', sans-serif" }}>{p.name}</div>
-            <ChevronIcon />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ flex: 1, height: 6, background: "#F3F4F6", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ width: (p.completed / p.tasks) * 100 + "%", height: "100%", background: p.color, borderRadius: 3, transition: "width 0.5s ease" }} />
-            </div>
-            <span style={{ fontSize: 12, color: "#9CA3AF", whiteSpace: "nowrap", fontFamily: "'DM Sans', sans-serif" }}>{p.completed}/{p.tasks}</span>
-          </div>
-        </div>
-      ))}
-      <AIPromptBar context="track" />
-    </div>
-  );
+  const projects=[{name:"Legal Setup",tasks:3,completed:2,color:"#6366F1",notif:2},{name:"Location",tasks:4,completed:0,color:"#EC4899",notif:1},{name:"Equipment",tasks:3,completed:0,color:"#F59E0B",notif:0},{name:"Marketing",tasks:5,completed:0,color:"#10B981",notif:1}];
+  return (<div style={{padding:"0 20px 100px"}}>
+    {projects.map((p,i)=>(<div key={i} style={styles.projectCard}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+        <div style={{width:10,height:10,borderRadius:3,background:p.color}}/>
+        <div style={{fontSize:15,fontWeight:600,color:"#1a1a2e",flex:1}}>{p.name}</div>
+        {p.notif>0&&<div style={{minWidth:18,height:18,borderRadius:9,background:"#EEF2FF",color:"#6366F1",fontSize:10,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{p.notif}</div>}
+        <ChevronIcon/>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{flex:1,height:6,background:"#F3F4F6",borderRadius:3,overflow:"hidden"}}><div style={{width:(p.completed/p.tasks)*100+"%",height:"100%",background:p.color,borderRadius:3,transition:"width 0.5s ease"}}/></div><span style={{fontSize:12,color:"#9CA3AF",whiteSpace:"nowrap"}}>{p.completed}/{p.tasks}</span></div>
+    </div>))}
+    <AIPromptBar context="track"/>
+  </div>);
 };
 
 const ExpensesContent = () => {
-  const expenses = [
-    { name: "Commercial lease deposit", amount: 4500, category: "Rent", date: "Feb 15" },
-    { name: "Business registration fee", amount: 125, category: "Legal", date: "Feb 12" },
-    { name: "Logo design (Fiverr)", amount: 280, category: "Marketing", date: "Feb 10" },
-    { name: "Domain & hosting", amount: 156, category: "Technology", date: "Feb 8" },
-    { name: "Accounting software", amount: 30, category: "Technology", date: "Feb 5" },
-  ];
-  const catColors = { Rent: "#6366F1", Legal: "#EC4899", Marketing: "#10B981", Technology: "#F59E0B" };
-  return (
-    <div style={{ padding: "0 20px 100px" }}>
-      <div style={styles.totalCard}>
-        <div style={{ fontSize: 12, color: "#9CA3AF", letterSpacing: 1, textTransform: "uppercase" }}>Total Expenses</div>
-        <div style={{ fontSize: 32, fontWeight: 700, color: "#1a1a2e", marginTop: 4 }}>$5,091</div>
-        <div style={{ fontSize: 13, color: "#9CA3AF" }}>This month</div>
-      </div>
-      {expenses.map((e, i) => (
-        <div key={i} style={styles.expenseRow}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: catColors[e.category] + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <div style={{ width: 8, height: 8, borderRadius: 2, background: catColors[e.category] }} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: "#1a1a2e" }}>{e.name}</div>
-            <div style={{ fontSize: 12, color: "#9CA3AF" }}>{e.category} · {e.date}</div>
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: "#1a1a2e" }}>-${e.amount.toLocaleString()}</div>
-        </div>
-      ))}
-      <button style={styles.addButton}><PlusIcon /> Add Expense</button>
-      <AIPromptBar context="budget" />
-    </div>
-  );
+  const expenses=[{name:"Commercial lease deposit",amount:4500,category:"Rent",date:"Feb 15"},{name:"Business registration fee",amount:125,category:"Legal",date:"Feb 12"},{name:"Logo design (Fiverr)",amount:280,category:"Marketing",date:"Feb 10"},{name:"Domain & hosting",amount:156,category:"Technology",date:"Feb 8"},{name:"Accounting software",amount:30,category:"Technology",date:"Feb 5"}];
+  const catColors={Rent:"#6366F1",Legal:"#EC4899",Marketing:"#10B981",Technology:"#F59E0B"};
+  return (<div style={{padding:"0 20px 100px"}}>
+    <div style={styles.totalCard}><div style={{fontSize:12,color:"#9CA3AF",letterSpacing:1,textTransform:"uppercase"}}>Total Expenses</div><div style={{fontSize:32,fontWeight:700,color:"#1a1a2e",marginTop:4}}>$5,091</div><div style={{fontSize:13,color:"#9CA3AF"}}>This month</div></div>
+    {expenses.map((e,i)=>(<div key={i} style={styles.expenseRow}>
+      <div style={{width:36,height:36,borderRadius:10,background:catColors[e.category]+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><div style={{width:8,height:8,borderRadius:2,background:catColors[e.category]}}/></div>
+      <div style={{flex:1}}><div style={{fontSize:14,fontWeight:500,color:"#1a1a2e"}}>{e.name}</div><div style={{fontSize:12,color:"#9CA3AF"}}>{e.category} \u00B7 {e.date}</div></div>
+      <div style={{fontSize:15,fontWeight:600,color:"#1a1a2e"}}>-${e.amount.toLocaleString()}</div>
+    </div>))}
+    <button style={styles.addButton}><PlusIcon/> Add Expense</button>
+    <AIPromptBar context="budget"/>
+  </div>);
 };
 
-const RevenueContent = () => (
-  <div style={{ padding: "0 20px 100px" }}>
-    <div style={{ ...styles.totalCard, background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)" }}>
-      <div style={{ fontSize: 12, color: "#6B7280", letterSpacing: 1, textTransform: "uppercase" }}>Total Revenue</div>
-      <div style={{ fontSize: 32, fontWeight: 700, color: "#1a1a2e", marginTop: 4 }}>$0</div>
-      <div style={{ fontSize: 13, color: "#6B7280" }}>No revenue recorded yet</div>
-    </div>
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <div style={{ fontSize: 40, marginBottom: 12 }}>📈</div>
-      <div style={{ fontSize: 15, fontWeight: 600, color: "#1a1a2e", marginBottom: 6 }}>Ready when you are</div>
-      <div style={{ fontSize: 13, color: "#9CA3AF", lineHeight: 1.6, maxWidth: 260, margin: "0 auto" }}>
-        Start tracking revenue as soon as your first customers come in. We'll help you categorize and forecast.
-      </div>
-    </div>
-    <button style={styles.addButton}><PlusIcon /> Record Revenue</button>
-    <AIPromptBar context="budget" />
-  </div>
-);
+const RevenueContent = () => (<div style={{padding:"0 20px 100px"}}>
+  <div style={{...styles.totalCard,background:"linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"}}><div style={{fontSize:12,color:"#6B7280",letterSpacing:1,textTransform:"uppercase"}}>Total Revenue</div><div style={{fontSize:32,fontWeight:700,color:"#1a1a2e",marginTop:4}}>$0</div><div style={{fontSize:13,color:"#6B7280"}}>No revenue recorded yet</div></div>
+  <div style={{textAlign:"center",padding:"40px 20px"}}><div style={{fontSize:40,marginBottom:12}}>{"\uD83D\uDCC8"}</div><div style={{fontSize:15,fontWeight:600,color:"#1a1a2e",marginBottom:6}}>Ready when you are</div><div style={{fontSize:13,color:"#9CA3AF",lineHeight:1.6,maxWidth:260,margin:"0 auto"}}>Start tracking revenue as soon as your first customers come in.</div></div>
+  <button style={styles.addButton}><PlusIcon/> Record Revenue</button><AIPromptBar context="budget"/>
+</div>);
 
-const DashboardContent = () => (
-  <div style={{ padding: "0 20px 100px" }}>
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-      {[
-        { label: "Expenses", value: "$5,091", color: "#EF4444" },
-        { label: "Revenue", value: "$0", color: "#10B981" },
-        { label: "Burn Rate", value: "$5,091", suffix: "/mo", color: "#1a1a2e" },
-        { label: "Funded", value: "$0", color: "#6366F1" },
-      ].map((m, i) => (
-        <div key={i} style={styles.metricCard}>
-          <div style={{ fontSize: 11, color: "#9CA3AF", letterSpacing: 0.5, textTransform: "uppercase" }}>{m.label}</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: m.color }}>{m.value}{m.suffix && <span style={{ fontSize: 12, color: "#9CA3AF" }}>{m.suffix}</span>}</div>
-        </div>
-      ))}
-    </div>
-    <div style={{ ...styles.sectionCard, padding: 16 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e", marginBottom: 12 }}>Spending by Category</div>
-      {[
-        { name: "Rent", amount: 4500, pct: 88, color: "#6366F1" },
-        { name: "Marketing", amount: 280, pct: 5.5, color: "#10B981" },
-        { name: "Technology", amount: 186, pct: 3.7, color: "#F59E0B" },
-        { name: "Legal", amount: 125, pct: 2.5, color: "#EC4899" },
-      ].map((c, i) => (
-        <div key={i} style={{ marginBottom: 10 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 13, color: "#4B5563" }}>{c.name}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e" }}>${c.amount.toLocaleString()}</span>
-          </div>
-          <div style={{ height: 6, background: "#F3F4F6", borderRadius: 3, overflow: "hidden" }}>
-            <div style={{ width: c.pct + "%", height: "100%", background: c.color, borderRadius: 3 }} />
-          </div>
-        </div>
-      ))}
-    </div>
-    <AIPromptBar context="budget" />
+const DashboardContent = () => (<div style={{padding:"0 20px 100px"}}>
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+    {[{label:"Expenses",value:"$5,091",color:"#EF4444"},{label:"Revenue",value:"$0",color:"#10B981"},{label:"Burn Rate",value:"$5,091",suffix:"/mo",color:"#1a1a2e"},{label:"Funded",value:"$0",color:"#6366F1"}].map((m,i)=>(<div key={i} style={styles.metricCard}><div style={{fontSize:11,color:"#9CA3AF",letterSpacing:0.5,textTransform:"uppercase"}}>{m.label}</div><div style={{fontSize:22,fontWeight:700,color:m.color}}>{m.value}{m.suffix&&<span style={{fontSize:12,color:"#9CA3AF"}}>{m.suffix}</span>}</div></div>))}
   </div>
-);
+  <div style={{...styles.sectionCard,padding:16}}>
+    <div style={{fontSize:13,fontWeight:600,color:"#1a1a2e",marginBottom:12}}>Spending by Category</div>
+    {[{name:"Rent",amount:4500,pct:88,color:"#6366F1"},{name:"Marketing",amount:280,pct:5.5,color:"#10B981"},{name:"Technology",amount:186,pct:3.7,color:"#F59E0B"},{name:"Legal",amount:125,pct:2.5,color:"#EC4899"}].map((c,i)=>(<div key={i} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:13,color:"#4B5563"}}>{c.name}</span><span style={{fontSize:13,fontWeight:600,color:"#1a1a2e"}}>${c.amount.toLocaleString()}</span></div><div style={{height:6,background:"#F3F4F6",borderRadius:3,overflow:"hidden"}}><div style={{width:c.pct+"%",height:"100%",background:c.color,borderRadius:3}}/></div></div>))}
+  </div><AIPromptBar context="budget"/>
+</div>);
 
 const FundingContent = ({ subTab }) => {
-  const opportunities = {
-    Grants: [
-      { title: "PA Small Business First Fund", amount: "Up to $100K", match: 92, deadline: "Mar 31, 2026", type: "State Grant", tags: ["Food & Beverage", "Women-Owned"] },
-      { title: "USDA Value-Added Producer Grant", amount: "$75K\u2013$250K", match: 78, deadline: "Apr 15, 2026", type: "Federal Grant", tags: ["Food Production"] },
-      { title: "Philly First Fund Grant", amount: "Up to $15K", match: 95, deadline: "Rolling", type: "Local Grant", tags: ["Philadelphia", "New Business"] },
-    ],
-    Loans: [
-      { title: "SBA 7(a) Loan", amount: "Up to $5M", match: 88, deadline: "Ongoing", type: "SBA", tags: ["General Purpose"] },
-      { title: "SBA Microloan", amount: "Up to $50K", match: 94, deadline: "Ongoing", type: "SBA", tags: ["Startup Friendly"] },
-      { title: "Kiva Small Business Loan", amount: "Up to $15K", match: 90, deadline: "Ongoing", type: "Nonprofit", tags: ["0% Interest", "Crowdfunded"] },
-    ],
-    Investment: [
-      { title: "Ben Franklin Technology Partners", amount: "Varies", match: 65, deadline: "Ongoing", type: "Angel/VC", tags: ["PA-Based", "Tech Focus"] },
-      { title: "Dreamit Ventures \u2013 Foodtech", amount: "$50K\u2013$500K", match: 55, deadline: "Q2 2026", type: "Accelerator", tags: ["Food & Bev"] },
-    ],
+  const opps={
+    Grants:[{title:"PA Small Business First Fund",amount:"Up to $100K",match:92,deadline:"Mar 31, 2026",type:"State Grant",tags:["Food & Beverage","Women-Owned"]},{title:"USDA Value-Added Producer Grant",amount:"$75K\u2013$250K",match:78,deadline:"Apr 15, 2026",type:"Federal Grant",tags:["Food Production"]},{title:"Philly First Fund Grant",amount:"Up to $15K",match:95,deadline:"Rolling",type:"Local Grant",tags:["Philadelphia","New Business"]}],
+    Loans:[{title:"SBA 7(a) Loan",amount:"Up to $5M",match:88,deadline:"Ongoing",type:"SBA",tags:["General Purpose"]},{title:"SBA Microloan",amount:"Up to $50K",match:94,deadline:"Ongoing",type:"SBA",tags:["Startup Friendly"]},{title:"Kiva Small Business Loan",amount:"Up to $15K",match:90,deadline:"Ongoing",type:"Nonprofit",tags:["0% Interest","Crowdfunded"]}],
+    Investment:[{title:"Ben Franklin Technology Partners",amount:"Varies",match:65,deadline:"Ongoing",type:"Angel/VC",tags:["PA-Based","Tech Focus"]},{title:"Dreamit Ventures \u2013 Foodtech",amount:"$50K\u2013$500K",match:55,deadline:"Q2 2026",type:"Accelerator",tags:["Food & Bev"]}],
   };
-  const items = opportunities[subTab] || [];
-  return (
-    <div style={{ padding: "0 20px 100px" }}>
-      <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 12 }}>{items.length} opportunities matched to your business</div>
-      {items.map((item, i) => (
-        <div key={i} style={styles.fundingCard}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: "#1a1a2e" }}>{item.title}</div>
-              <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}>{item.type} \u00B7 Deadline: {item.deadline}</div>
-            </div>
-            <div style={{
-              background: "conic-gradient(#10B981 " + (item.match * 3.6) + "deg, #F3F4F6 0deg)",
-              width: 40, height: 40, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              <div style={{ width: 30, height: 30, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#1a1a2e" }}>
-                {item.match}%
-              </div>
-            </div>
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a2e", marginBottom: 8 }}>{item.amount}</div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {item.tags.map((tag, j) => (
-              <span key={j} style={{ fontSize: 11, padding: "3px 8px", background: "#F3F4F6", borderRadius: 4, color: "#6B7280" }}>{tag}</span>
-            ))}
-          </div>
-        </div>
-      ))}
-      <AIPromptBar context="funding" />
-    </div>
-  );
+  const items=opps[subTab]||[];
+  return (<div style={{padding:"0 20px 100px"}}>
+    <div style={{fontSize:12,color:"#9CA3AF",marginBottom:12}}>{items.length} opportunities matched to your business</div>
+    {items.map((item,i)=>(<div key={i} style={styles.fundingCard}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+        <div style={{flex:1}}><div style={{fontSize:15,fontWeight:600,color:"#1a1a2e"}}>{item.title}</div><div style={{fontSize:12,color:"#9CA3AF",marginTop:2}}>{item.type} \u00B7 Deadline: {item.deadline}</div></div>
+        <div style={{background:"conic-gradient(#10B981 "+(item.match*3.6)+"deg, #F3F4F6 0deg)",width:40,height:40,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><div style={{width:30,height:30,borderRadius:"50%",background:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#1a1a2e"}}>{item.match}%</div></div>
+      </div>
+      <div style={{fontSize:18,fontWeight:700,color:"#1a1a2e",marginBottom:8}}>{item.amount}</div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{item.tags.map((tag,j)=>(<span key={j} style={{fontSize:11,padding:"3px 8px",background:"#F3F4F6",borderRadius:4,color:"#6B7280"}}>{tag}</span>))}</div>
+    </div>))}
+    <AIPromptBar context="funding"/>
+  </div>);
 };
 
+/* ===== MAIN APP ===== */
 function BossWorksApp() {
-  const [activeTab, setActiveTab] = useState("plan");
-  const [activeSubTab, setActiveSubTab] = useState({
-    plan: "Business Plan", track: "Tasks", budget: "Expenses", funding: "Grants",
-  });
-  const handleSubTab = (tab) => setActiveSubTab((prev) => ({ ...prev, [activeTab]: tab }));
+  const [activeTab,setActiveTab]=useState("plan");
+  const [activeSubTab,setActiveSubTab]=useState({plan:"Business Plan",track:"Tasks",budget:"Expenses",funding:"Grants"});
+  const [showNotifications,setShowNotifications]=useState(false);
+  const [showProfile,setShowProfile]=useState(false);
+  const [adminScreen,setAdminScreen]=useState(null);
+  const [isAdmin,setIsAdmin]=useState(true);
 
-  const renderContent = () => {
-    const sub = activeSubTab[activeTab];
-    if (activeTab === "plan" && sub === "Business Plan") return <BusinessPlanContent />;
-    if (activeTab === "plan" && sub === "Financial Plan") return <FinancialPlanContent />;
-    if (activeTab === "track" && sub === "Tasks") return <TasksContent />;
-    if (activeTab === "track" && sub === "Projects") return <ProjectsContent />;
-    if (activeTab === "budget" && sub === "Expenses") return <ExpensesContent />;
-    if (activeTab === "budget" && sub === "Revenue") return <RevenueContent />;
-    if (activeTab === "budget" && sub === "Dashboard") return <DashboardContent />;
-    if (activeTab === "funding") return <FundingContent subTab={sub} />;
+  const handleSubTab=(tab)=>setActiveSubTab(prev=>({...prev,[activeTab]:tab}));
+  const renderContent=()=>{
+    const sub=activeSubTab[activeTab];
+    if(activeTab==="plan"&&sub==="Business Plan") return <BusinessPlanContent/>;
+    if(activeTab==="plan"&&sub==="Financial Plan") return <FinancialPlanContent/>;
+    if(activeTab==="track"&&sub==="Tasks") return <TasksContent/>;
+    if(activeTab==="track"&&sub==="Projects") return <ProjectsContent/>;
+    if(activeTab==="budget"&&sub==="Expenses") return <ExpensesContent/>;
+    if(activeTab==="budget"&&sub==="Revenue") return <RevenueContent/>;
+    if(activeTab==="budget"&&sub==="Dashboard") return <DashboardContent/>;
+    if(activeTab==="funding") return <FundingContent subTab={sub}/>;
     return null;
   };
-
-  const tabs = [
-    { id: "plan", label: "Plan" },
-    { id: "track", label: "Track" },
-    { id: "budget", label: "Budget" },
-    { id: "funding", label: "Funding" },
-  ];
+  const tabs=[{id:"plan",label:"Plan"},{id:"track",label:"Track"},{id:"budget",label:"Budget"},{id:"funding",label:"Funding"}];
 
   return (
     <div style={styles.phoneFrame}>
-      <div style={styles.statusBar}>
-        <span style={{ fontWeight: 600 }}>9:41</span>
-        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          <svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="6" width="3" height="6" rx="0.5" fill="#1a1a2e"/><rect x="4.5" y="4" width="3" height="8" rx="0.5" fill="#1a1a2e"/><rect x="9" y="1.5" width="3" height="10.5" rx="0.5" fill="#1a1a2e"/><rect x="13" y="0" width="3" height="12" rx="0.5" fill="#1a1a2e"/></svg>
-          <svg width="24" height="12" viewBox="0 0 24 12"><rect x="0" y="0" width="21" height="12" rx="2" stroke="#1a1a2e" strokeWidth="1" fill="none"/><rect x="21.5" y="3.5" width="2" height="5" rx="1" fill="#1a1a2e"/><rect x="1.5" y="1.5" width="17" height="9" rx="1" fill="#1a1a2e"/></svg>
-        </div>
-      </div>
+      <div style={styles.statusBar}><span style={{fontWeight:600}}>9:41</span><div style={{display:"flex",gap:4,alignItems:"center"}}><svg width="16" height="12" viewBox="0 0 16 12"><rect x="0" y="6" width="3" height="6" rx="0.5" fill="#1a1a2e"/><rect x="4.5" y="4" width="3" height="8" rx="0.5" fill="#1a1a2e"/><rect x="9" y="1.5" width="3" height="10.5" rx="0.5" fill="#1a1a2e"/><rect x="13" y="0" width="3" height="12" rx="0.5" fill="#1a1a2e"/></svg><svg width="24" height="12" viewBox="0 0 24 12"><rect x="0" y="0" width="21" height="12" rx="2" stroke="#1a1a2e" strokeWidth="1" fill="none"/><rect x="21.5" y="3.5" width="2" height="5" rx="1" fill="#1a1a2e"/><rect x="1.5" y="1.5" width="17" height="9" rx="1" fill="#1a1a2e"/></svg></div></div>
       <div style={styles.header}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: "#1a1a2e", letterSpacing: -0.5 }}>Boss Works</div>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        <div style={{fontSize:22,fontWeight:700,color:"#1a1a2e",letterSpacing:-0.5}}>Boss Works</div>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <div onClick={()=>{setShowNotifications(true);setShowProfile(false);setAdminScreen(null);}}><BellIcon count={4}/></div>
+          <div onClick={()=>{setShowProfile(true);setShowNotifications(false);setAdminScreen(null);}} style={{width:32,height:32,borderRadius:10,background:isAdmin?"linear-gradient(135deg, #6366F1, #8B5CF6)":"linear-gradient(135deg, #EC4899, #F472B6)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}><span style={{color:"#fff",fontSize:13,fontWeight:700}}>{isAdmin?"S":"P"}</span></div>
         </div>
       </div>
-      <div style={styles.subTabBar}>
-        {SUB_TABS[activeTab].map((tab) => (
-          <button key={tab} onClick={() => handleSubTab(tab)} style={{
-            ...styles.subTab,
-            color: activeSubTab[activeTab] === tab ? "#1a1a2e" : "#9CA3AF",
-            borderBottom: activeSubTab[activeTab] === tab ? "2px solid #1a1a2e" : "2px solid transparent",
-            fontWeight: activeSubTab[activeTab] === tab ? 600 : 400,
-          }}>{tab}</button>
-        ))}
-      </div>
+      <div style={styles.subTabBar}>{SUB_TABS[activeTab].map(tab=>(<button key={tab} onClick={()=>handleSubTab(tab)} style={{...styles.subTab,color:activeSubTab[activeTab]===tab?"#1a1a2e":"#9CA3AF",borderBottom:activeSubTab[activeTab]===tab?"2px solid #1a1a2e":"2px solid transparent",fontWeight:activeSubTab[activeTab]===tab?600:400}}>{tab}</button>))}</div>
       <div style={styles.contentArea}>{renderContent()}</div>
-      <div style={styles.bottomNav}>
-        {tabs.map((tab) => {
-          const active = activeTab === tab.id;
-          const IconComponent = iconMap[tab.id];
-          return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              ...styles.navButton,
-              background: active ? "#1a1a2e" : "transparent",
-              transform: active ? "scale(1)" : "scale(0.95)",
-            }}>
-              <IconComponent active={active} />
-              <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, letterSpacing: 0.3, color: active ? "#fff" : "#8B8FA3", marginTop: 2 }}>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <div style={styles.bottomNav}>{tabs.map(tab=>{const active=activeTab===tab.id;const IC=iconMap[tab.id];return(<button key={tab.id} onClick={()=>{setActiveTab(tab.id);setShowNotifications(false);setShowProfile(false);setAdminScreen(null);}} style={{...styles.navButton,background:active?"#1a1a2e":"transparent",transform:active?"scale(1)":"scale(0.95)"}}><IC active={active}/><span style={{fontSize:10,fontWeight:active?600:400,letterSpacing:0.3,color:active?"#fff":"#8B8FA3",marginTop:2}}>{tab.label}</span></button>);})}</div>
+      {showNotifications&&<NotificationPanel onClose={()=>setShowNotifications(false)}/>}
+      {showProfile&&!adminScreen&&<ProfilePanel onClose={()=>setShowProfile(false)} onAdminNavigate={s=>setAdminScreen(s)} isAdmin={isAdmin} onToggleRole={setIsAdmin}/>}
+      {adminScreen==="users"&&<AdminUserManagement onBack={()=>setAdminScreen(null)}/>}
+      {adminScreen==="business"&&<AdminBusinessOverview onBack={()=>setAdminScreen(null)}/>}
+      {adminScreen==="billing"&&<AdminBilling onBack={()=>setAdminScreen(null)}/>}
+      {adminScreen==="settings"&&<AdminSettings onBack={()=>setAdminScreen(null)}/>}
     </div>
   );
 }
 
-const styles = {
-  phoneFrame: {
-    width: 393, maxWidth: "100%", height: 852, background: "#FAFAFA", borderRadius: 40,
-    boxShadow: "0 25px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
-    overflow: "hidden", position: "relative", fontFamily: "'DM Sans', sans-serif",
-  },
-  statusBar: {
-    height: 48, padding: "14px 24px 0", display: "flex", justifyContent: "space-between",
-    alignItems: "center", fontSize: 14, color: "#1a1a2e",
-  },
-  header: {
-    padding: "8px 20px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
-  },
-  subTabBar: {
-    display: "flex", gap: 0, padding: "0 20px", borderBottom: "1px solid #ECECEF",
-    overflowX: "auto",
-  },
-  subTab: {
-    padding: "10px 14px", background: "none", border: "none", cursor: "pointer",
-    fontSize: 13, fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap",
-    transition: "all 0.15s ease",
-  },
-  contentArea: {
-    height: "calc(100% - 48px - 52px - 42px - 68px)", overflowY: "auto", paddingTop: 16,
-  },
-  bottomNav: {
-    position: "absolute", bottom: 0, left: 0, right: 0, height: 68,
-    background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)",
-    borderTop: "1px solid #ECECEF", display: "flex", justifyContent: "space-around",
-    alignItems: "center", padding: "0 8px",
-  },
-  navButton: {
-    display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-    gap: 1, border: "none", cursor: "pointer", borderRadius: 14,
-    padding: "8px 16px", transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-    minWidth: 64, fontFamily: "'DM Sans', sans-serif",
-  },
-  sectionCard: {
-    background: "#fff", borderRadius: 14, padding: "14px 16px", marginBottom: 10,
-    border: "1px solid #ECECEF",
-  },
-  sectionHeader: { display: "flex", alignItems: "center", gap: 10 },
-  sectionNumber: {
-    fontSize: 11, fontWeight: 700, color: "#9CA3AF", width: 28, height: 28, borderRadius: 8,
-    background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-  },
-  sectionTitle: { fontSize: 14, fontWeight: 600, color: "#1a1a2e" },
-  sectionMeta: { fontSize: 12, color: "#9CA3AF" },
-  statusBadge: {
-    fontSize: 11, fontWeight: 600, padding: "3px 8px", borderRadius: 6,
-    marginLeft: "auto", whiteSpace: "nowrap",
-  },
-  sectionPreview: { fontSize: 13, color: "#6B7280", marginTop: 10, lineHeight: 1.5 },
-  taskRow: { display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 0", borderBottom: "1px solid #F3F4F6" },
-  projectCard: { background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10, border: "1px solid #ECECEF" },
-  totalCard: {
-    background: "linear-gradient(135deg, #fef3f2 0%, #fef9f0 100%)",
-    borderRadius: 16, padding: 20, marginBottom: 16, textAlign: "center",
-  },
-  expenseRow: { display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid #F3F4F6" },
-  addButton: {
-    width: "100%", padding: "14px", borderRadius: 12, border: "2px dashed #D1D5DB",
-    background: "transparent", color: "#6B7280", fontSize: 14, fontWeight: 500,
-    fontFamily: "'DM Sans', sans-serif", cursor: "pointer", marginTop: 12,
-    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-  },
-  metricCard: { background: "#fff", borderRadius: 14, padding: 16, border: "1px solid #ECECEF" },
-  fundingCard: { background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10, border: "1px solid #ECECEF" },
+const styles={
+  phoneFrame:{width:393,maxWidth:"100%",height:852,background:"#FAFAFA",borderRadius:40,boxShadow:"0 25px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",overflow:"hidden",position:"relative",fontFamily:"'DM Sans', sans-serif"},
+  statusBar:{height:48,padding:"14px 24px 0",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:14,color:"#1a1a2e"},
+  header:{padding:"8px 20px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"},
+  subTabBar:{display:"flex",gap:0,padding:"0 20px",borderBottom:"1px solid #ECECEF",overflowX:"auto"},
+  subTab:{padding:"10px 14px",background:"none",border:"none",cursor:"pointer",fontSize:13,fontFamily:"'DM Sans', sans-serif",whiteSpace:"nowrap",transition:"all 0.15s ease"},
+  contentArea:{height:"calc(100% - 48px - 52px - 42px - 68px)",overflowY:"auto",paddingTop:16},
+  bottomNav:{position:"absolute",bottom:0,left:0,right:0,height:68,background:"rgba(255,255,255,0.92)",backdropFilter:"blur(20px)",borderTop:"1px solid #ECECEF",display:"flex",justifyContent:"space-around",alignItems:"center",padding:"0 8px"},
+  navButton:{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:1,border:"none",cursor:"pointer",borderRadius:14,padding:"8px 16px",transition:"all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",minWidth:64,fontFamily:"'DM Sans', sans-serif"},
+  sectionCard:{background:"#fff",borderRadius:14,padding:"14px 16px",marginBottom:10,border:"1px solid #ECECEF"},
+  sectionHeader:{display:"flex",alignItems:"center",gap:10},
+  sectionNumber:{fontSize:11,fontWeight:700,color:"#9CA3AF",width:28,height:28,borderRadius:8,background:"#F3F4F6",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0},
+  sectionTitle:{fontSize:14,fontWeight:600,color:"#1a1a2e"},
+  sectionMeta:{fontSize:12,color:"#9CA3AF"},
+  statusBadge:{fontSize:11,fontWeight:600,padding:"3px 8px",borderRadius:6,marginLeft:"auto",whiteSpace:"nowrap"},
+  sectionPreview:{fontSize:13,color:"#6B7280",marginTop:10,lineHeight:1.5},
+  taskRow:{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 0",borderBottom:"1px solid #F3F4F6"},
+  projectCard:{background:"#fff",borderRadius:14,padding:16,marginBottom:10,border:"1px solid #ECECEF"},
+  totalCard:{background:"linear-gradient(135deg, #fef3f2 0%, #fef9f0 100%)",borderRadius:16,padding:20,marginBottom:16,textAlign:"center"},
+  expenseRow:{display:"flex",alignItems:"center",gap:12,padding:"12px 0",borderBottom:"1px solid #F3F4F6"},
+  addButton:{width:"100%",padding:"14px",borderRadius:12,border:"2px dashed #D1D5DB",background:"transparent",color:"#6B7280",fontSize:14,fontWeight:500,fontFamily:"'DM Sans', sans-serif",cursor:"pointer",marginTop:12,display:"flex",alignItems:"center",justifyContent:"center",gap:6},
+  metricCard:{background:"#fff",borderRadius:14,padding:16,border:"1px solid #ECECEF"},
+  fundingCard:{background:"#fff",borderRadius:14,padding:16,marginBottom:10,border:"1px solid #ECECEF"},
 };
 
-ReactDOM.createRoot(document.getElementById("root")).render(<BossWorksApp />);
+ReactDOM.createRoot(document.getElementById("root")).render(<BossWorksApp/>);
 </script>
 </body>
 </html>
